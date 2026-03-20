@@ -3,63 +3,61 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Producto;
+use App\Http\Resources\ProductoResource;
 use Illuminate\Http\Request;
 
 class ProductoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return ProductoResource::collection(
+            Producto::with(['categoria', 'proveedor'])->get()
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre'        => 'required|string|max:250',
+            'detalle'       => 'required|string',
+            'precio_compra' => 'required|numeric|min:0',
+            'precio_venta'  => 'required|numeric|min:0',
+            'stock'         => 'required|integer|min:0',
+            'stock_minimo'  => 'required|integer|min:0',
+            'id_categoria'  => 'required|exists:categorias,id',
+            'id_proveedor'  => 'required|exists:proveedores,id',
+        ]);
+
+        $producto = Producto::create($request->all());
+        return new ProductoResource($producto->load(['categoria', 'proveedor']));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Producto $producto)
     {
-        //
+        return new ProductoResource($producto->load(['categoria', 'proveedor']));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Producto $producto)
     {
-        //
+        $request->validate([
+            'nombre'        => 'sometimes|string|max:250',
+            'detalle'       => 'sometimes|string',
+            'precio_compra' => 'sometimes|numeric|min:0',
+            'precio_venta'  => 'sometimes|numeric|min:0',
+            'stock'         => 'sometimes|integer|min:0',
+            'stock_minimo'  => 'sometimes|integer|min:0',
+            'id_categoria'  => 'sometimes|exists:categorias,id',
+            'id_proveedor'  => 'sometimes|exists:proveedores,id',
+        ]);
+
+        $producto->update($request->all());
+        return new ProductoResource($producto->load(['categoria', 'proveedor']));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Producto $producto)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $producto->update(['estado' => 0]);
+        return response()->json(['message' => 'Producto desactivado']);
     }
 }
