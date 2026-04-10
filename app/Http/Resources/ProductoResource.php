@@ -2,18 +2,24 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProductoResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
-        return parent::toArray($request);
+        return [
+            'id'            => $this->id,
+            'nombre'        => $this->nombre,
+            'detalle'       => $this->detalle,
+            'imagen'        => $this->imagen,
+            'precio_compra' => $this->precio_compra,
+            'precio_venta'  => $this->precio_venta,
+            'stock'         => $this->stock,
+            'stock_minimo'  => $this->stock_minimo,
+            'estado'        => $this->estado,
+            'categoria'     => new CategoriaResource($this->whenLoaded('categoria')),
+            'proveedor'     => new ProveedorResource($this->whenLoaded('proveedor')),
+        ];
     }
 }

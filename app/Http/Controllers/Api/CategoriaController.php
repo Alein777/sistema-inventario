@@ -3,63 +3,47 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Categoria;
+use App\Http\Resources\CategoriaResource;
 use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return CategoriaResource::collection(Categoria::all());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre' => 'required|string|max:255|unique:categorias',
+            'estado' => 'sometimes|integer',
+        ]);
+
+        $categoria = Categoria::create($request->all());
+        return new CategoriaResource($categoria);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Categoria $categoria)
     {
-        //
+        return new CategoriaResource($categoria);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Categoria $categoria)
     {
-        //
+        $request->validate([
+            'nombre' => 'sometimes|string|max:255|unique:categorias,nombre,'.$categoria->id,
+            'estado' => 'sometimes|integer',
+        ]);
+
+        $categoria->update($request->all());
+        return new CategoriaResource($categoria);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Categoria $categoria)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $categoria->update(['estado' => 0]);
+        return response()->json(['message' => 'Categoría desactivada']);
     }
 }

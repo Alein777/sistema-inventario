@@ -3,63 +3,73 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Movimiento;
+use App\Http\Resources\MovimientoResource;
 use Illuminate\Http\Request;
 
 class MovimientoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return MovimientoResource::collection(
+            Movimiento::with(['producto', 'user'])->get()
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'id_producto' => 'required|exists:productos,id',
+            'tipo' => 'required|in:entrada,salida',
+            'cantidad' => 'required|integer|min:1',
+            'motivo' => 'nullable|string|max:255',
+        ]);
+
+        $producto = \App\Models\Producto::findOrFail($request->id_producto);
+        $stock_anterior = $producto->stock;
+
+        if ($request->tipo === 'entrada') {
+            $stock_nuevo = $stock_anterior + $request->cantidad;
+        } else {
+            if ($stock_anterior < $request->cantidad) {
+                return response()->json(['message' => 'Stock insuficiente'], 422);
+            }
+            $stock_nuevo = $stock_anterior - $request->cantidad;
+        }
+
+        $producto->update(['stock' => $stock_nuevo]);
+
+        $movimiento = Movimiento::create([
+            'id_producto' => $request->id_producto,
+            'id_user' => auth()->id(),
+            'tipo' => $request->tipo,
+            'cantidad' => $request->cantidad,
+            'stock_anterior' => $stock_anterior,
+            'stock_nuevo' => $stock_nuevo,
+            'motivo' => $request->motivo,
+        ]);
+
+        return new MovimientoResource($movimiento->load(['producto', 'user']));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Movimiento $movimiento)
     {
-        //
+        return new MovimientoResource($movimiento->load(['producto', 'user']));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Movimiento $movimiento)
     {
-        //
+        $request->validate([
+            'motivo' => 'sometimes|string|max:255',
+        ]);
+
+        $movimiento->update($request->all());
+        return new MovimientoResource($movimiento->load(['producto', 'user']));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Movimiento $movimiento)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $movimiento->delete();
+        return response()->json(['message' => 'Movimiento eliminado']);
     }
 }
