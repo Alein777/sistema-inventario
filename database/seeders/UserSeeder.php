@@ -9,19 +9,21 @@ use Spatie\Permission\Models\Role;
 class UserSeeder extends Seeder
 {
     public function run(): void
-    {
-        // Crear roles
-        $admin    = Role::create(['name' => 'Administrador']);
-        $empleado = Role::create(['name' => 'Empleado']);
+{
+    // Crear roles si no existen
+    $admin    = Role::firstOrCreate(['name' => 'Administrador']);
+    $empleado = Role::firstOrCreate(['name' => 'Empleado']);
 
-        // Crear usuario administrador
-        $user = User::create([
+    // Crear usuario administrador si no existe
+    $user = User::firstOrCreate(
+        ['email' => 'admin@gdastore.com'],
+        [
             'name'     => 'Administrador',
-            'email'    => 'admin@gdastore.com',
             'password' => bcrypt('password'),
             'estado'   => 1,
-        ]);
+        ]
+    );
 
-        $user->assignRole($admin);
-    }
+    $user->assignRole($admin);
+}
 }
