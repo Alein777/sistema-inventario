@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use App\Http\Resources\ProductoResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductoController extends Controller
 {
@@ -27,9 +28,16 @@ class ProductoController extends Controller
             'stock_minimo'  => 'required|integer|min:0',
             'id_categoria'  => 'required|exists:categorias,id',
             'id_proveedor'  => 'required|exists:proveedores,id',
+            'imagen'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $producto = Producto::create($request->all());
+         $data = $request->except('imagen');
+
+        if ($request->hasFile('imagen')) {
+            $data['imagen'] = $request->file('imagen')->store('productos', 'public');
+        }
+
+        $producto = Producto::create($data);
         return new ProductoResource($producto->load(['categoria', 'proveedor']));
     }
 
@@ -49,9 +57,29 @@ class ProductoController extends Controller
             'stock_minimo'  => 'sometimes|integer|min:0',
             'id_categoria'  => 'sometimes|exists:categorias,id',
             'id_proveedor'  => 'sometimes|exists:proveedores,id',
+            'imagen'        => 'sometimes|nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $producto->update($request->all());
+        $data = $request->except('imagen');
+
+         
+        if ($request->hasFile('imagen')) {
+          
+            if ($producto->imagen && $producto->imagen !== 'default.jpg') {
+                Storage::disk('public')->delete($producto->imagen);
+            }
+            $data['imagen'] = $request->file('imagen')->store('productos', 'public');
+        }
+        
+        elseif ($request->input('eliminar_imagen') === '1') {
+            if ($producto->imagen && $producto->imagen !== 'default.jpg') {
+                Storage::disk('public')->delete($producto->imagen);
+            }
+            $data['imagen'] = 'default.jpg';
+        }
+      
+
+        $producto->update($data);
         return new ProductoResource($producto->load(['categoria', 'proveedor']));
     }
 
