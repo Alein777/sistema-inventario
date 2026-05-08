@@ -12,7 +12,8 @@ class ProductoResource extends JsonResource
             'id'            => $this->id,
             'nombre'        => $this->nombre,
             'detalle'       => $this->detalle,
-            'imagen'        => $this->imagen ? asset('storage/' . $this->imagen) : null,
+
+
             'precio_compra' => $this->precio_compra,
             'precio_venta'  => $this->precio_venta,
             'stock'         => $this->stock,
@@ -20,8 +21,17 @@ class ProductoResource extends JsonResource
             'estado'        => $this->estado,
             'id_categoria'  => $this->id_categoria,
             'id_proveedor'  => $this->id_proveedor,
-            'categoria'     => new CategoriaResource($this->whenLoaded('categoria')),
-            'proveedor'     => new ProveedorResource($this->whenLoaded('proveedor')),
+
+
+            'imagen' => $this->imagen,
+
+            'imagen_url' => ($this->imagen && $this->imagen !== 'default.jpg')
+                ? asset('storage/' . $this->imagen)
+                : null,
+
+            'categoria' => $this->whenLoaded('categoria'),
+            'proveedor' => $this->whenLoaded('proveedor'),
+
         ];
     }
 }
