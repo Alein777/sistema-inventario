@@ -23,7 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('usuarios', UserController::class);
     Route::apiResource('categorias', CategoriaController::class);
     Route::apiResource('proveedores', ProveedorController::class);
-    Route::apiResource('productos', ProductoController::class);
+    Route::post('/productos/{producto}', [ProductoController::class, 'update']);
+Route::apiResource('productos', ProductoController::class)->except(['update']);
     Route::apiResource('movimientos', MovimientoController::class);
     Route::apiResource('departamentos', DepartamentoController::class);
     Route::apiResource('municipios', MunicipioController::class);

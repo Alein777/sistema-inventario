@@ -27,9 +27,16 @@ class ProductoController extends Controller
             'stock_minimo'  => 'required|integer|min:0',
             'id_categoria'  => 'required|exists:categorias,id',
             'id_proveedor'  => 'required|exists:proveedores,id',
+            'imagen'        => 'nullable|image|max:2048',
         ]);
 
-        $producto = Producto::create($request->all());
+        $data = $request->except(['imagen', '_method']);
+
+        if ($request->hasFile('imagen')) {
+            $data['imagen'] = $request->file('imagen')->store('productos', 'public');
+        }
+
+        $producto = Producto::create($data);
         return new ProductoResource($producto->load(['categoria', 'proveedor']));
     }
 
@@ -49,9 +56,20 @@ class ProductoController extends Controller
             'stock_minimo'  => 'sometimes|integer|min:0',
             'id_categoria'  => 'sometimes|exists:categorias,id',
             'id_proveedor'  => 'sometimes|exists:proveedores,id',
+            'imagen'        => 'nullable|image|max:2048',
+            'estado'        => 'sometimes|integer',
         ]);
 
-        $producto->update($request->all());
+        $data = $request->except(['imagen', '_method']);
+
+        if ($request->hasFile('imagen')) {
+            if ($producto->imagen && $producto->imagen !== 'default.jpg') {
+                \Storage::disk('public')->delete($producto->imagen);
+            }
+            $data['imagen'] = $request->file('imagen')->store('productos', 'public');
+        }
+
+        $producto->update($data);
         return new ProductoResource($producto->load(['categoria', 'proveedor']));
     }
 
