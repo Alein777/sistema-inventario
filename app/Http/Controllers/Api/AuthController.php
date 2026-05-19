@@ -16,7 +16,8 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        // CORRECCIÓN PARA POSTGRESQL: Convierte ambos lados a minúsculas para evitar el problema de Case-Sensitive
+        $user = User::whereRaw('LOWER(email) = ?', [strtolower($request->email)])->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -35,10 +36,11 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'user'  => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
-                'roles' => $user->getRoleNames(),
+                'id'       => $user->id,
+                'name'     => $user->name,
+                'email'    => $user->email,
+                'roles'    => $user->getRoleNames(),
+                'permisos' => $user->getAllPermissions()->pluck('name'),
             ]
         ]);
     }
@@ -57,10 +59,11 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'id'    => $user->id,
-            'name'  => $user->name,
-            'email' => $user->email,
-            'roles' => $user->getRoleNames(),
+            'id'       => $user->id,
+            'name'     => $user->name,
+            'email'    => $user->email,
+            'roles'    => $user->getRoleNames(),
+            'permisos' => $user->getAllPermissions()->pluck('name'),
         ]);
     }
 }

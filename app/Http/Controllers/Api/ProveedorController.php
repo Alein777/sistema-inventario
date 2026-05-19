@@ -24,6 +24,7 @@ class ProveedorController extends Controller
             'telefono'  => 'required|string|max:20',
             'email'     => 'nullable|email|max:255',
             'tipo'      => 'nullable|string|max:100',
+            'pais'         => 'nullable|string|max:255',
             'id_municipio' => 'nullable|exists:municipios,id',
         ]);
 
@@ -44,6 +45,7 @@ class ProveedorController extends Controller
             'telefono'  => 'sometimes|string|max:20',
             'email'     => 'nullable|email|max:255',
             'tipo'      => 'nullable|string|max:100',
+            'pais'         => 'nullable|string|max:255',
             'id_municipio' => 'nullable|exists:municipios,id',
         ]);
 

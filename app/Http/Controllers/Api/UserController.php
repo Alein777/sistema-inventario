@@ -29,7 +29,7 @@ class UserController extends Controller
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
-            'password' => bcrypt($request->password),
+            'password' => bcrypt($request->password), // Encriptación correcta al crear
             'estado'   => 1,
         ]);
 
@@ -48,18 +48,22 @@ class UserController extends Controller
         $request->validate([
             'name'     => 'sometimes|string|max:255',
             'email'    => 'sometimes|email|unique:users,email,'.$user->id,
-            'password' => 'sometimes|min:6',
+            'password' => 'sometimes|nullable|min:6', // Permitimos nullable por si no la cambian
             'rol'      => 'sometimes|exists:roles,name',
             'estado'   => 'sometimes|integer',
         ]);
 
-        if ($request->has('password')) {
-            $request->merge(['password' => bcrypt($request->password)]);
+        // Extraemos solo los campos que vamos a actualizar de forma segura
+        $data = $request->only(['name', 'email', 'estado']);
+
+        // CORRECCIÓN CRUCIAL: Procesamos la contraseña de manera limpia e infalible
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password);
         }
 
-        $user->update($request->only(['name', 'email', 'password', 'estado']));
+        $user->update($data);
 
-        if ($request->has('rol')) {
+        if ($request->has('rol') && $request->rol) {
             $user->syncRoles($request->rol);
         }
 

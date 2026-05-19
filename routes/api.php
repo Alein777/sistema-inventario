@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\ProductoController;
 use App\Http\Controllers\Api\MovimientoController;
 use App\Http\Controllers\Api\DepartamentoController;
 use App\Http\Controllers\Api\MunicipioController;
-
+use App\Http\Controllers\Api\RoleController;
 // Rutas públicas
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -17,9 +17,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-    
+
     Route::get('departamentos/{departamento}/municipios', [DepartamentoController::class, 'municipios']);
-    
+
     Route::apiResource('usuarios', UserController::class);
     Route::apiResource('categorias', CategoriaController::class);
     Route::apiResource('proveedores', ProveedorController::class);
@@ -28,5 +28,6 @@ Route::apiResource('productos', ProductoController::class)->except(['update']);
     Route::apiResource('movimientos', MovimientoController::class);
     Route::apiResource('departamentos', DepartamentoController::class);
     Route::apiResource('municipios', MunicipioController::class);
+    Route::apiResource('roles', RoleController::class);
 
 });

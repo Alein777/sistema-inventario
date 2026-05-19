@@ -18,6 +18,7 @@ return new class extends Migration
         $table->string('telefono', 20);
         $table->string('email', 255)->nullable();
         $table->string('tipo', 100)->nullable();
+        $table->string('pais')->nullable();
         $table->foreignId('id_municipio')->nullable()->constrained('municipios');
         $table->tinyInteger('estado')->default(1);
         $table->timestamps();

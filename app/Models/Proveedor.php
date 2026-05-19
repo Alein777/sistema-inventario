@@ -7,11 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Proveedor extends Model
 {
     protected $table = 'proveedores';
-    
+
     protected $fillable = [
-        'nombre', 'contacto', 'telefono',
-        'email', 'tipo', 'id_municipio', 'estado'
-    ];
+    'nombre',
+    'contacto',
+    'telefono',
+    'email',
+    'tipo',
+    'pais',            
+    'id_municipio',
+    'estado'
+];
 
     public function municipio()
     {
